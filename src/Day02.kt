@@ -1,51 +1,42 @@
 fun main() {
+    fun List<Int>.isReportSafe(): Boolean {
+        val differences = this.zipWithNext { a, b -> a - b }
+
+        val allPositiveNumbers = differences.count { it in 1..3 }
+        val allNegativeNumbers = differences.count { it in -3..-1 }
+        val total = differences.count()
+
+        return allPositiveNumbers == total || allNegativeNumbers == total
+    }
+
     fun part1(input: List<String>): Int {
-        var safeCount = 0
-        input.forEach { line ->
-            val levels = line.split(" ").map { it.toInt() }
-            val allDifferences = buildList<Int> {
-                levels.forEachIndexed { index, level ->
-                    if (index != levels.lastIndex) {
-                        add(level - levels[index + 1])
-                    }
-                }
-            }
-
-            val safe = if (levels[0] - levels[1] > 0) {
-                allDifferences.all { i -> (i > 0 && i < 4) }
-            } else {
-                allDifferences.all { i -> (i < 0 && i > -4) }
-            }
-
-            if (safe) safeCount++
+        val reportList = input.map {
+            it.split(" ").map { it.toInt() }
         }
-        return safeCount
+
+        return reportList.count { it.isReportSafe() }
     }
 
     fun part2(input: List<String>): Int {
-        var safeCount = 0
-        input.forEach { line ->
-            val levels = line.split(" ").map { it.toInt() }
-            println(levels.zipWithNext { a, b -> a - b})
-//            val allDifferences = buildList<Int> {
-//                levels.forEachIndexed { index, level ->
-//                    if (index != levels.lastIndex) {
-//                        add(level - levels[index + 1])
-//                    }
-//                }
-//            }
-//
-//            val differenceSize = if (levels[0] - levels[1] > 0) {
-//                allDifferences.filterNot { i -> (i > 0 && i < 4) }.size
-//            } else {
-//                allDifferences.filterNot { i -> (i < 0 && i > -4) }.size
-//            }
-//
-//            if (differenceSize == 0 || differenceSize == 1) safeCount++
+        val reportList = input.map {
+            it.split(" ").map { it.toInt() }
         }
-        return safeCount
+
+        var totalSafeReports = 0
+        reportList.forEach { differences ->
+            for (index in 0..differences.lastIndex) {
+                val isReportSafe = differences.toMutableList().apply { removeAt(index) }.isReportSafe()
+
+                if (isReportSafe) {
+                    totalSafeReports++
+                    break
+                }
+            }
+        }
+
+        return totalSafeReports
     }
 
     check(part1(readInput("Day02_test")) == 326)
-    println(part2(readInput("Day02_test")))
+    check(part2(readInput("Day02_test")) == 381)
 }
